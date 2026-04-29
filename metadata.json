@@ -1,0 +1,6 @@
+{
+  "name": "OneLife-Manager",
+  "description": "Un'app per organizzare partite, palazzetti sportivi, impegni personali e contatti, con integrazione mappe e notifiche PWA.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": []
+}
