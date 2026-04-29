@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../db/firebase';
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithRedirect } from 'firebase/auth';
 import { CalendarDays, Mail, Lock } from 'lucide-react';
 import { Button } from '../components/ui';
 
@@ -14,11 +14,33 @@ export function LoginView() {
     try {
       setError(null);
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      if (isIOS) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (err: any) {
+          if (
+            err.code === 'auth/popup-blocked' || 
+            err.code === 'auth/popup-closed-by-user' || 
+            err.code === 'auth/unauthorized-domain' || 
+            err.code === 'auth/web-storage-unsupported'
+          ) {
+            await signInWithRedirect(auth, provider);
+          } else {
+            throw err;
+          }
+        }
+      }
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Accesso annullato.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+         setError('Dominio non autorizzato in Firebase. Aggiungilo nella console.');
       } else {
         setError(err.message || 'Errore durante l\'accesso con Google.');
       }
