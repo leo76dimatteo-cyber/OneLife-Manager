@@ -5,14 +5,23 @@ import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from "
 import { MapPin as MapIcon, Navigation, Search, Flag, MapPin } from "lucide-react";
 import { cn } from "../lib/utils";
 
+import { isIOS, openNavigation as navigateTo } from "../lib/nav";
+
 export function NavigatoreView() {
   const arenas = useLiveQuery(() => db.arenas.orderBy("name").toArray()) || [];
   const [destination, setDestination] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
 
-  const navigateTo = (dest: string) => {
-    if (dest.trim()) {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`, "_blank");
+  const useCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords;
+        setDestination(`${latitude},${longitude}`);
+      }, (error) => {
+        alert("Impossibile ottenere la posizione attuale. Assicurati che i permessi siano attivi.");
+      });
+    } else {
+      alert("Il tuo browser non supporta la geolocalizzazione.");
     }
   };
 
@@ -50,14 +59,24 @@ export function NavigatoreView() {
             <form onSubmit={handleNavigate} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="destination">Indirizzo o Nome del Luogo</Label>
-                <Input 
-                  id="destination" 
-                  placeholder="es. Stadio Olimpico, Roma" 
-                  value={destination} 
-                  onChange={e => setDestination(e.target.value)} 
-                  className="h-12 md:h-14 text-base md:text-lg"
-                  required 
-                />
+                <div className="relative">
+                  <Input 
+                    id="destination" 
+                    placeholder="es. Stadio Olimpico, Roma" 
+                    value={destination} 
+                    onChange={e => setDestination(e.target.value)} 
+                    className="h-12 md:h-14 text-base md:text-lg pr-12"
+                    required 
+                  />
+                  <button 
+                    type="button"
+                    onClick={useCurrentLocation}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-300 transition-colors"
+                    title="Usa posizione attuale"
+                  >
+                    <MapPin className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <div className="flex flex-col gap-3">
                 <Button type="submit" size="lg" className="w-full h-12 md:h-14 text-base md:text-lg" disabled={!destination.trim()}>

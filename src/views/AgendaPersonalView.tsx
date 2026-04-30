@@ -3,16 +3,19 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { v4 as uuidv4 } from "uuid";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type PersonalEvent } from "../db/db";
+import { db, type PersonalEvent, type Arena } from "../db/db";
 import { generateIcs } from "../lib/calendar";
 import { cn } from "../lib/utils";
+import { openNavigation } from "../lib/nav";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Textarea } from "../components/ui";
-import { MapPin, Calendar, Plus, Trash2, Edit2, MapPin as MapIcon, Download, Search } from "lucide-react";
+import { MapPin, Calendar, Plus, Trash2, Edit2, MapPin as MapIcon, Download, Search, Book } from "lucide-react";
 
 export function AgendaPersonalView() {
   const events = useLiveQuery(() => db.personalEvents.orderBy("date").toArray()) || [];
+  const arenas = useLiveQuery(() => db.arenas.orderBy("name").toArray()) || [];
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [showAddressPicker, setShowAddressPicker] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<PersonalEvent>>({
     title: "",
@@ -58,10 +61,6 @@ export function AgendaPersonalView() {
     if (confirm("Sei sicuro di voler eliminare questo evento?")) {
       await db.personalEvents.delete(id);
     }
-  };
-
-  const openNavigation = (location: string) => {
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location)}`, "_blank");
   };
 
   const exportCalendar = () => {
@@ -125,9 +124,52 @@ export function AgendaPersonalView() {
                 <Label htmlFor="date">Data e Ora</Label>
                 <Input id="date" type="datetime-local" value={formData.date ? format(typeof formData.date === 'string' ? new Date(formData.date) : formData.date, "yyyy-MM-dd'T'HH:mm") : ""} onChange={e => setFormData({...formData, date: new Date(e.target.value)})} required />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="location">Luogo / Indirizzo</Label>
-                <Input id="location" placeholder="es. Centro Sportivo, Via Roma 1" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} required />
+                <div className="flex gap-2">
+                  <Input 
+                    id="location" 
+                    placeholder="es. Centro Sportivo, Via Roma 1" 
+                    value={formData.location} 
+                    onChange={e => setFormData({...formData, location: e.target.value})} 
+                    required 
+                  />
+                  {arenas.length > 0 && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowAddressPicker(!showAddressPicker)}
+                      title="Scegli da indirizzi salvati"
+                      className="shrink-0 aspect-square p-0 w-10 flex items-center justify-center border-slate-700 bg-slate-800/50"
+                    >
+                      <Book className="w-4 h-4 text-emerald-400" />
+                    </Button>
+                  )}
+                </div>
+                
+                {showAddressPicker && arenas.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 lg:max-h-48 overflow-y-auto">
+                    <div className="p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-950/50">
+                      Indirizzi Salvati
+                    </div>
+                    <div className="flex flex-col">
+                      {arenas.map(arena => (
+                        <button
+                          key={arena.id}
+                          type="button"
+                          className="w-full text-left p-3 hover:bg-slate-800 transition-colors border-b border-slate-800/50 last:border-0"
+                          onClick={() => {
+                            setFormData({...formData, location: arena.address});
+                            setShowAddressPicker(false);
+                          }}
+                        >
+                          <p className="font-bold text-sm text-slate-200">{arena.name}</p>
+                          <p className="text-xs text-slate-400 truncate">{arena.address}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Note Aggiuntive</Label>

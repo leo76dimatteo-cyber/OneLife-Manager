@@ -66,7 +66,9 @@ export default function App() {
            await getDocFromServer(doc(dbFirestore, 'test', 'connection'));
          } catch (error) {
            if(error instanceof Error && error.message.includes('the client is offline')) {
-             console.error("Please check your Firebase configuration.");
+             console.warn("Firebase is offline or not configured completely.");
+           } else {
+             console.warn("Firebase connection test failed.", error);
            }
          }
       }
