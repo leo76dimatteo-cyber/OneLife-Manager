@@ -14,6 +14,7 @@ import { DashboardView } from "./views/DashboardView";
 import { GuidaView } from "./views/GuidaView";
 import { ImpostazioniView } from "./views/ImpostazioniView";
 import { cn } from "./lib/utils";
+import { playNotificationSound } from "./lib/notifications";
 import { CalendarDays, User, Users, Navigation, Menu, X, BellRing, Clock, LogOut, Settings, LayoutDashboard, HelpCircle } from "lucide-react";
 
 type ViewType = 'dashboard' | 'agenda-sport' | 'agenda-personal' | 'rubrica' | 'navigatore' | 'impostazioni' | 'guida';
@@ -87,17 +88,34 @@ export default function App() {
       
       const now = new Date();
       try {
+        // Check Sport Matches
         const matches = await db.matches.toArray();
         matches.forEach((m) => {
           if (!m.reminders || m.reminders.length === 0) return;
           m.reminders.forEach((r) => {
             const reminderTime = new Date(m.date.getTime() - r * 60000);
             const diff = now.getTime() - reminderTime.getTime();
-            // Trigger if within the last minute
             if (diff >= 0 && diff < 60000) {
               new Notification(`Promemoria Partita: ${m.title}`, {
-                body: `Oggi alle ${format(m.date, "HH:mm")} a ${m.location}`,
+                body: `Inizia alle ${format(m.date, "HH:mm")} a ${m.location}`,
               });
+              playNotificationSound();
+            }
+          });
+        });
+
+        // Check Personal Events
+        const personalEvents = await db.personalEvents.toArray();
+        personalEvents.forEach((e) => {
+          if (!e.reminders || e.reminders.length === 0) return;
+          e.reminders.forEach((r) => {
+            const reminderTime = new Date(e.date.getTime() - r * 60000);
+            const diff = now.getTime() - reminderTime.getTime();
+            if (diff >= 0 && diff < 60000) {
+              new Notification(`Promemoria Personale: ${e.title}`, {
+                body: `Inizia alle ${format(e.date, "HH:mm")} a ${e.location}`,
+              });
+              playNotificationSound();
             }
           });
         });
@@ -257,6 +275,7 @@ export default function App() {
                       new Notification("OneLife Manager", {
                         body: "Notifiche attivate con successo! 🎉",
                       });
+                      playNotificationSound();
                     }}
                     className="text-indigo-400 hover:text-indigo-300 transition-colors"
                     title="Test Notifica"
