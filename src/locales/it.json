@@ -1,0 +1,189 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "agendaSport": "Agenda Sport",
+    "agendaPersonal": "Agenda Personale",
+    "rubrica": "Contatti",
+    "navigatore": "Navigatore GPS",
+    "impostazioni": "Impostazioni",
+    "guida": "Guida",
+    "logout": "Esci",
+    "mainMenu": "Menu Principale",
+    "user": "Utente",
+    "enableNotifications": "Abilita Notifiche",
+    "notificationsOn": "Notifiche On",
+    "testNotification": "Test Notifica",
+    "online": "Online",
+    "viewMore": "Vedi Altro",
+    "viewAll": "Vedi Tutti",
+    "filterAll": "Tutti",
+    "filterSport": "Sport",
+    "filterPersonal": "Personale",
+    "search": "Cerca...",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "delete": "Elimina",
+    "confirmDelete": "Sei sicuro di voler eliminare questo elemento?",
+    "nextMeeting": "Prossimo Incontro",
+    "navigation": "Navigazione",
+    "share": "Condividi",
+    "shareInfo": "Condividi Info",
+    "shareSuccess": "Dettagli copiati!",
+    "importSuccessCount": "Importati {{count}} eventi con successo!",
+    "reminders": "Promemoria",
+    "minutes": "minuti",
+    "active": "Attivo",
+    "notificationsEnabled": "Notifiche On",
+    "notificationsActiveMsg": "Notifiche attivate con successo! 🎉"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Storico Impegni Settimanali",
+    "thisWeek": "Questa Settimana",
+    "noEvents": "Nessun impegno pianificato per questa settimana.",
+    "eventType": {
+      "sport": "Sportivi",
+      "personal": "Personali"
+    }
+  },
+  "navigatore": {
+    "title": "Navigatore GPS",
+    "subtitle": "Raggiungi i tuoi impegni",
+    "searchTitle": "Cerca Destinazione",
+    "viewOnMap": "Guarda sulla Mappa",
+    "noArenas": "Nessun palazzetto trovato in rubrica.",
+    "searchPlaceholder": "Cerca indirizzo salvato...",
+    "destinationLabel": "Indirizzo o Nome Luogo",
+    "destinationPlaceholder": "es. Stadio Olimpico, Roma",
+    "calculateRoute": "Calcola Percorso",
+    "savedAddresses": "Indirizzi Salvati",
+    "useCurrentLocation": "Usa posizione attuale",
+    "errors": {
+      "geolocationDenied": "Impossibile ottenere la posizione attuale. Assicurati che i permessi siano attivi.",
+      "geolocationUnsupported": "Il tuo browser non supporta la geolocalizzazione."
+    }
+  },
+  "agenda": {
+    "export": "Esporta ICS",
+    "import": "Importa impegni",
+    "personal": {
+      "title": "Agenda Personale",
+      "subtitle": "I tuoi impegni e allenamenti",
+      "newEvent": "Nuovo Evento",
+      "editEvent": "Modifica Evento",
+      "eventTitle": "Titolo Evento",
+      "eventTitlePlaceholder": "es. Allenamento Palestra",
+      "eventDate": "Data e Ora",
+      "eventLocation": "Luogo",
+      "eventLocationPlaceholder": "es. Centro Sportivo, Via Roma 1",
+      "eventNotes": "Note",
+      "eventNotesPlaceholder": "Dettagli...",
+      "empty": "Nessun evento personale trovato.",
+      "addFirst": "Aggiungi il tuo primo evento"
+    },
+    "sport": {
+      "title": "Agenda Sport",
+      "subtitle": "Gestione partite e logistica squadra",
+      "newMatch": "Nuova Partita",
+      "editMatch": "Modifica Partita",
+      "matchTitle": "Titolo / Squadre",
+      "matchTitlePlaceholder": "es. Lakers vs Bulls",
+      "matchDate": "Data e Ora",
+      "matchLocation": "Luogo",
+      "matchLocationPlaceholder": "Cerca campo salvato...",
+      "matchNotes": "Note",
+      "matchNotesPlaceholder": "Dettagli...",
+      "empty": "Nessuna partita trovata.",
+      "addFirst": "Aggiungi la tua prima partita",
+      "tabs": {
+        "matches": "Partite",
+        "arenas": "Campi"
+      },
+      "arenas": {
+        "title": "Campi di gioco",
+        "subtitle": "Sedi delle squadre salvate",
+        "newArena": "Nuovo Campo",
+        "editArena": "Modifica Campo",
+        "name": "Nome Campo",
+        "namePlaceholder": "Nome campo",
+        "address": "Indirizzo Completo",
+        "addressPlaceholder": "Indirizzo completo",
+        "contacts": "Contatti / Tel",
+        "contactsPlaceholder": "Contatti / Tel",
+        "empty": "Nessun campo trovato.",
+        "addFirst": "Aggiungi il tuo primo campo",
+        "navigate": "Portami qui"
+      }
+    }
+  },
+  "contacts": {
+    "title": "Rubrica Contatti",
+    "subtitle": "Gestisci contatti sportivi e personali",
+    "newContact": "Nuovo Contatto",
+    "editContact": "Modifica Contatto",
+    "name": "Nome / Soprannome",
+    "type": "Tipo Contatto",
+    "phone": "Telefono",
+    "email": "Email",
+    "notes": "Note (Ruolo, Squadra, etc...)",
+    "empty": "Nessun contatto trovato in questa rubrica.",
+    "addFirst": "Aggiungi il primo contatto",
+    "sport": "Sportivo",
+    "personal": "Personale"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "subtitle": "Gestisci il tuo profilo e i tuoi dati",
+    "theme": {
+      "title": "Tema e Colori",
+      "subtitle": "Personalizza i colori dei bordi con tonalità fluorescenti."
+    },
+    "language": {
+      "title": "Lingua",
+      "select": "Seleziona Lingua",
+      "auto": "L'app rileva automaticamente la lingua del browser. Se una traduzione non è disponibile nei file, verrà generata automaticamente via IA per tutte le lingue parlate.",
+      "clearCache": "Aggiorna traduzioni automatiche",
+      "cacheCleared": "Cache delle traduzioni svuotata. Ricarica per aggiornare."
+    },
+    "security": {
+      "title": "Sicurezza Account",
+      "loggedInAs": "Accesso effettuato come:",
+      "newPassword": "Nuova Password",
+      "confirmPassword": "Conferma Nuova Password",
+      "update": "Aggiorna Password",
+      "success": "Password aggiornata con successo!",
+      "errorMismatch": "Le password non corrispondono",
+      "errorUnauthentic": "Utente non autenticato"
+    },
+    "backup": {
+      "title": "Backup e Ripristino",
+      "exportDesc": "Esporta tutti i tuoi dati (eventi, contatti, campi) in un file JSON.",
+      "exportBtn": "Esegui Backup",
+      "importDesc": "Ripristina i dati da un file di backup precedente.",
+      "importWarning": "Attenzione: questo sovrascriverà tutti i dati correnti!",
+      "importBtn": "Ripristina da Backup",
+      "importSuccess": "Dati ripristinati con successo!",
+      "importError": "Errore durante il ripristino dei dati. Verifica che il file sia corretto."
+    }
+  },
+  "login": {
+    "login": "Accedi",
+    "register": "Registrati",
+    "email": "Email",
+    "password": "Password",
+    "loginWithEmail": "Accedi con Email",
+    "registerWithEmail": "Registrati con Email",
+    "googleLogin": "Accedi con Google",
+    "or": "OPPURE",
+    "noAccount": "Non hai un account?",
+    "haveAccount": "Hai già un account?",
+    "errors": {
+      "cancelled": "Accesso annullato.",
+      "unauthorized": "Dominio non autorizzato in Firebase.",
+      "googleError": "Errore durante l'accesso con Google.",
+      "invalidCredentials": "Email o password non validi.",
+      "emailInUse": "Questa email è già in uso.",
+      "authError": "Errore di autenticazione."
+    }
+  }
+}

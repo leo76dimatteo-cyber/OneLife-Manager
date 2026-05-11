@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { it } from "date-fns/locale";
+import { it, enUS } from "date-fns/locale";
 import { db } from "./db/db";
 import { auth } from "./db/firebase";
 import { onAuthStateChanged, User as FirebaseUser, signOut } from "firebase/auth";
 import { doc, getDocFromServer } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 import { AgendaSportView } from "./views/AgendaSportView";
 import { AgendaPersonalView } from "./views/AgendaPersonalView";
 import { RubricaView } from "./views/RubricaView";
@@ -15,17 +16,33 @@ import { GuidaView } from "./views/GuidaView";
 import { ImpostazioniView } from "./views/ImpostazioniView";
 import { cn } from "./lib/utils";
 import { playNotificationSound } from "./lib/notifications";
-import { CalendarDays, User, Users, Navigation, Menu, X, BellRing, Clock, LogOut, Settings, LayoutDashboard, HelpCircle } from "lucide-react";
+import { Globe, CalendarDays, User, Users, Navigation, Menu, X, BellRing, Clock, LogOut, Settings, LayoutDashboard, HelpCircle } from "lucide-react";
+import { Toaster, toast } from "sonner";
 
 type ViewType = 'dashboard' | 'agenda-sport' | 'agenda-personal' | 'rubrica' | 'navigatore' | 'impostazioni' | 'guida';
 
+function LanguageIndicator() {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language.split('-')[0].toUpperCase();
+  
+  return (
+    <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-800/50 border border-slate-700/50 text-[10px] font-bold text-slate-400">
+      <Globe className="w-3.5 h-3.5 text-indigo-400" />
+      <span>{currentLang}</span>
+    </div>
+  );
+}
+
 function ClockDisplay() {
+  const { i18n } = useTranslation();
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const dateLocale = i18n.language.startsWith('it') ? it : enUS;
 
   return (
     <div className="flex items-center gap-2">
@@ -35,7 +52,7 @@ function ClockDisplay() {
           {format(now, "HH:mm:ss")}
         </div>
         <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-          {format(now, "EEEE d MMMM", { locale: it })}
+          {format(now, "EEEE d MMMM", { locale: dateLocale })}
         </div>
       </div>
     </div>
@@ -43,6 +60,7 @@ function ClockDisplay() {
 }
 
 export default function App() {
+  const { t } = useTranslation();
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -92,13 +110,14 @@ export default function App() {
         const matches = await db.matches.toArray();
         matches.forEach((m) => {
           if (!m.reminders || m.reminders.length === 0) return;
-          m.reminders.forEach((r) => {
+            m.reminders.forEach((r) => {
             const reminderTime = new Date(m.date.getTime() - r * 60000);
             const diff = now.getTime() - reminderTime.getTime();
             if (diff >= 0 && diff < 60000) {
-              new Notification(`Promemoria Partita: ${m.title}`, {
-                body: `Inizia alle ${format(m.date, "HH:mm")} a ${m.location}`,
-              });
+              const msg = `${t('common.agendaSport')}: ${m.title}`;
+              const body = `${format(m.date, "HH:mm")} - ${m.location}`;
+              new Notification(msg, { body });
+              toast.info(msg, { description: body });
               playNotificationSound();
             }
           });
@@ -112,9 +131,10 @@ export default function App() {
             const reminderTime = new Date(e.date.getTime() - r * 60000);
             const diff = now.getTime() - reminderTime.getTime();
             if (diff >= 0 && diff < 60000) {
-              new Notification(`Promemoria Personale: ${e.title}`, {
-                body: `Inizia alle ${format(e.date, "HH:mm")} a ${e.location}`,
-              });
+              const msg = `${t('common.agendaPersonal')}: ${e.title}`;
+              const body = `${format(e.date, "HH:mm")} - ${e.location}`;
+              new Notification(msg, { body });
+              toast.info(msg, { description: body });
               playNotificationSound();
             }
           });
@@ -132,13 +152,13 @@ export default function App() {
   }, [user]);
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'agenda-sport', label: 'Agenda Sportiva', icon: CalendarDays },
-    { id: 'agenda-personal', label: 'Agenda Personale', icon: User },
-    { id: 'rubrica', label: 'Rubrica', icon: Users },
-    { id: 'navigatore', label: 'Navigatore', icon: Navigation },
-    { id: 'impostazioni', label: 'Impostazioni', icon: Settings },
-    { id: 'guida', label: 'Guida', icon: HelpCircle },
+    { id: 'dashboard', label: t('common.dashboard'), icon: LayoutDashboard },
+    { id: 'agenda-sport', label: t('common.agendaSport'), icon: CalendarDays },
+    { id: 'agenda-personal', label: t('common.agendaPersonal'), icon: User },
+    { id: 'rubrica', label: t('common.rubrica'), icon: Users },
+    { id: 'navigatore', label: t('common.navigatore'), icon: Navigation },
+    { id: 'impostazioni', label: t('common.impostazioni'), icon: Settings },
+    { id: 'guida', label: t('common.guida'), icon: HelpCircle },
   ] as const;
 
   const handleNavClick = (view: ViewType) => {
@@ -168,7 +188,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row font-sans text-slate-100 overflow-hidden">
-      
+      <Toaster theme="dark" position="bottom-right" />
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 z-50 shadow-md">
         <div className="flex flex-col">
@@ -182,12 +202,15 @@ export default function App() {
              <ClockDisplay />
           </div>
         </div>
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors self-start mt-1"
-        >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="flex items-center gap-2">
+            <LanguageIndicator />
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors self-start"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
       </div>
 
       {/* Sidebar (Desktop) / Mobile Menu */}
@@ -211,7 +234,7 @@ export default function App() {
         </div>
         
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 px-3 mt-4">Menu Principale</p>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 px-3 mt-4">{t('common.mainMenu')}</p>
           {navItems.map(item => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -245,14 +268,14 @@ export default function App() {
                   </div>
                 )}
                 <div className="text-left w-32 overflow-hidden">
-                  <p className="text-xs font-bold text-white truncate">{user.displayName || 'Utente'}</p>
+                  <p className="text-xs font-bold text-white truncate">{user.displayName || t('common.user')}</p>
                   <p className="text-[10px] text-emerald-400">Online</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
                 className="text-slate-400 hover:text-red-400 transition-colors p-1"
-                title="Esci"
+                title={t('common.logout')}
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -264,21 +287,25 @@ export default function App() {
                   onClick={() => Notification.requestPermission()}
                   className="w-full text-center text-[10px] bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/40 px-2 py-1.5 rounded border border-indigo-500/20 font-bold uppercase transition-colors"
                 >
-                  Abilita Notifiche
+                  {t('common.enableNotifications')}
                 </button>
               )}
               {("Notification" in window) && Notification.permission === "granted" && (
                 <div className="flex items-center justify-between w-full text-xs text-slate-500">
-                  <span>Notifiche On</span>
+                  <div className="flex items-center gap-2">
+                    <span>{t('common.notificationsEnabled')}</span>
+                    <LanguageIndicator />
+                  </div>
                   <button 
                     onClick={() => {
                       new Notification("OneLife Manager", {
-                        body: "Notifiche attivate con successo! 🎉",
+                        body: t('common.notificationsActiveMsg'),
                       });
+                      toast.success(t('common.notificationsActiveMsg'));
                       playNotificationSound();
                     }}
                     className="text-indigo-400 hover:text-indigo-300 transition-colors"
-                    title="Test Notifica"
+                    title={t('common.notificationsTest')}
                   >
                     <BellRing className="w-4 h-4" />
                   </button>

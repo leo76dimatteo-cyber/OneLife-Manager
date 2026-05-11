@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { v4 as uuidv4 } from "uuid";
@@ -9,8 +10,10 @@ import { cn } from "../lib/utils";
 import { openNavigation } from "../lib/nav";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Textarea } from "../components/ui";
 import { MapPin, Share2, Bell, Calendar, Plus, Trash2, Edit2, Upload, Download, MapPin as MapIcon, Phone, Search, Book } from "lucide-react";
+import { toast } from "sonner";
 
 export function AgendaSportView() {
+  const { t, i18n } = useTranslation();
   const matches = useLiveQuery(() => db.matches.orderBy("date").toArray()) || [];
   const arenas = useLiveQuery(() => db.arenas.orderBy("name").toArray()) || [];
   
@@ -104,24 +107,25 @@ export function AgendaSportView() {
   };
 
   const handleDeleteMatch = async (id: string) => {
-    if (confirm("Sei sicuro di voler eliminare questa partita?")) {
+    if (confirm(t('common.confirmDelete'))) {
       await db.matches.delete(id);
     }
   };
 
   const handleDeleteArena = async (id: string) => {
-    if (confirm("Sei sicuro di voler eliminare questo palazzetto?")) {
+    if (confirm(t('common.confirmDelete'))) {
       await db.arenas.delete(id);
     }
   };
 
   const shareMatch = async (m: MatchEvent) => {
-    const text = `⚽ Partita: ${m.title}\n📅 Data: ${format(m.date, "EEEE d MMMM yyyy, HH:mm", { locale: it })}\n📍 Luogo: ${m.location}${m.notes ? `\n📝 Note: ${m.notes}` : ''}`;
+    const dateStr = format(m.date, "EEEE d MMMM yyyy, HH:mm", { locale: i18n.language === 'it' ? it : undefined });
+    const text = `${t('agenda.sport.matchTitle')}: ${m.title}\n📅 ${t('agenda.sport.matchDate')}: ${dateStr}\n📍 ${t('agenda.sport.matchLocation')}: ${m.location}${m.notes ? `\n📝 ${t('agenda.sport.matchNotes')}: ${m.notes}` : ''}`;
     if (navigator.share) {
-      try { await navigator.share({ title: "Dettagli Partita", text }); } catch (err) {}
+      try { await navigator.share({ title: t('common.shareInfo'), text }); } catch (err) {}
     } else {
       navigator.clipboard.writeText(text);
-      alert("Dettagli copiati negli appunti!");
+      toast.success(t('common.shareSuccess', 'Dettagli copiati!'));
     }
   };
 
@@ -158,7 +162,7 @@ export function AgendaSportView() {
         added++;
       }
     }
-    alert(`Importati ${added} eventi con successo!`);
+    toast.success(t('common.importSuccessCount', { count: added }));
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -166,31 +170,31 @@ export function AgendaSportView() {
     <div className="w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">Agenda Sportiva</h2>
-          <p className="text-slate-400 text-sm mt-1">Gestione incontri e logistica squadra</p>
+          <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">{t('agenda.sport.title')}</h2>
+          <p className="text-slate-400 text-sm mt-1">{t('agenda.sport.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           {activeTab === 'partite' && !showForm && (
             <>
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} title="Importa ICS">
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} title={t('common.import')}>
                 <Upload className="w-4 h-4 md:mr-2" />
-                <span className="hidden md:inline">Importa</span>
+                <span className="hidden md:inline">{t('common.import')}</span>
               </Button>
               <input type="file" accept=".ics" ref={fileInputRef} className="hidden" onChange={importCalendar} />
-              <Button variant="outline" size="sm" onClick={exportCalendar} title="Esporta al Calendario">
+              <Button variant="outline" size="sm" onClick={exportCalendar} title={t('common.export')}>
                 <Download className="w-4 h-4 md:mr-2" />
-                <span className="hidden md:inline">Esporta</span>
+                <span className="hidden md:inline">{t('common.export')}</span>
               </Button>
               <Button onClick={() => setShowForm(true)}>
                 <Plus className="w-4 h-4 md:mr-1" />
-                <span className="hidden md:inline">Nuova Partita</span>
+                <span className="hidden md:inline">{t('agenda.sport.newMatch')}</span>
               </Button>
             </>
           )}
           {activeTab === 'palazzetti' && !showArenaForm && (
             <Button onClick={() => setShowArenaForm(true)}>
               <Plus className="w-4 h-4 md:mr-1" />
-              <span className="hidden md:inline">Nuovo Palazzetto</span>
+              <span className="hidden md:inline">{t('agenda.sport.arenas.newArena')}</span>
             </Button>
           )}
         </div>
@@ -203,20 +207,20 @@ export function AgendaSportView() {
             size="sm" 
             onClick={() => { setActiveTab('partite'); setShowArenaForm(false); }}
           >
-            Partite
+            {t('agenda.sport.tabs.matches')}
           </Button>
           <Button 
             variant={activeTab === 'palazzetti' ? 'default' : 'ghost'} 
             size="sm" 
             onClick={() => { setActiveTab('palazzetti'); setShowForm(false); }}
           >
-            Palazzetti
+            {t('agenda.sport.tabs.arenas')}
           </Button>
         </div>
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
           <Input 
-            placeholder="Cerca..." 
+            placeholder={t('common.search')} 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-9 w-full sm:w-64 bg-slate-900 border-slate-800"
@@ -230,20 +234,20 @@ export function AgendaSportView() {
           {showForm ? (
             <Card className="mb-8 max-w-2xl mx-auto">
               <CardHeader>
-                <CardTitle className="text-2xl font-black italic">{editingId ? "Modifica Incontro" : "Nuovo Incontro"}</CardTitle>
+                <CardTitle className="text-2xl font-black italic">{editingId ? t('agenda.sport.editMatch') : t('agenda.sport.newMatch')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveMatch} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Titolo / Squadre</Label>
+                    <Label htmlFor="title">{t('agenda.sport.matchTitle')}</Label>
                     <Input id="title" placeholder="es. Scapoli contro Ammogliati" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="date">Data e Ora</Label>
+                    <Label htmlFor="date">{t('agenda.sport.matchDate')}</Label>
                     <Input id="date" type="datetime-local" value={formData.date ? format(typeof formData.date === 'string' ? new Date(formData.date) : formData.date, "yyyy-MM-dd'T'HH:mm") : ""} onChange={e => setFormData({...formData, date: new Date(e.target.value)})} required />
                   </div>
                   <div className="space-y-2 relative">
-                    <Label htmlFor="location">Luogo / Indirizzo</Label>
+                    <Label htmlFor="location">{t('agenda.sport.matchLocation')}</Label>
                     <div className="flex gap-2">
                       <Input 
                         id="location" 
@@ -269,7 +273,7 @@ export function AgendaSportView() {
                     {showAddressPicker && arenas.length > 0 && (
                       <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 max-h-48 overflow-y-auto">
                         <div className="p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-950/50">
-                          Palazzetti Salvati
+                          {t('agenda.sport.arenas.title')}
                         </div>
                         <div className="flex flex-col">
                           {arenas.map(arena => (
@@ -291,7 +295,7 @@ export function AgendaSportView() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="reminders">Promemoria (minuti prima)</Label>
+                    <Label htmlFor="reminders">{t('common.reminders')} ({t('common.minutes')})</Label>
                     <div className="flex gap-2">
                       <Input 
                         id="reminders" 
@@ -321,12 +325,12 @@ export function AgendaSportView() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Note Aggiuntive</Label>
+                    <Label htmlFor="notes">{t('agenda.sport.matchNotes')}</Label>
                     <Textarea id="notes" placeholder="Portare i palloni, quote da raccogliere..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
                   </div>
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Annulla</Button>
-                    <Button type="submit">Salva</Button>
+                    <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>{t('common.cancel')}</Button>
+                    <Button type="submit">{t('common.save')}</Button>
                   </div>
                 </form>
               </CardContent>
@@ -336,8 +340,8 @@ export function AgendaSportView() {
               {matches.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.location.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
                 <div className="xl:col-span-12 text-center py-20 text-slate-500 border border-dashed rounded-3xl border-slate-700 bg-slate-900/50">
                   <Calendar className="w-16 h-16 mx-auto mb-6 opacity-40 text-indigo-500" />
-                  <p className="text-lg font-medium text-slate-400 mb-4">Nessuna partita trovata.</p>
-                  <Button onClick={() => {setShowForm(true); setSearchQuery('');}}>Aggiungi il tuo primo incontro</Button>
+                  <p className="text-lg font-medium text-slate-400 mb-4">{t('agenda.sport.empty')}</p>
+                  <Button onClick={() => {setShowForm(true); setSearchQuery('');}}>{t('agenda.sport.addFirst')}</Button>
                 </div>
               ) : (
                 matches.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.location.toLowerCase().includes(searchQuery.toLowerCase())).map((m, index) => {
@@ -351,7 +355,7 @@ export function AgendaSportView() {
                           </div>
                           <div className="relative z-10">
                             <div className="flex justify-between items-start mb-4">
-                              <span className="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider inline-block">Prossimo Incontro</span>
+                              <span className="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider inline-block">{t('common.nextMeeting')}</span>
                               <div className="flex bg-slate-800/80 md:bg-slate-800 backdrop-blur-sm rounded-full p-1 opacity-100 gap-1 border border-slate-700/50">
                                 <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full text-slate-300 hover:text-white hover:bg-slate-700 active:bg-slate-600 transition-colors" onClick={() => handleEditMatch(m)}><Edit2 className="w-4 h-4" /></Button>
                                 <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full text-slate-300 hover:text-red-400 hover:bg-slate-700 active:bg-red-500/20 transition-colors" onClick={() => handleDeleteMatch(m.id)}><Trash2 className="w-4 h-4" /></Button>
@@ -365,7 +369,7 @@ export function AgendaSportView() {
                           <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between mt-8 md:mt-16 gap-4">
                             <div>
                               <p className="text-5xl md:text-6xl font-bold tabular-nums tracking-tighter text-indigo-400">{format(m.date, "HH:mm")}</p>
-                              <p className="text-slate-400 font-medium mt-1">{format(m.date, "EEEE, d MMMM", { locale: it })}</p>
+                              <p className="text-slate-400 font-medium mt-1 uppercase tracking-wider">{format(m.date, "EEEE, d MMMM", { locale: i18n.language === 'it' ? it : undefined })}</p>
                             </div>
                             {m.notes && (
                               <div className="hidden sm:block max-w-[200px] text-sm text-slate-500 text-right italic line-clamp-3">
@@ -383,7 +387,7 @@ export function AgendaSportView() {
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent"></div>
                             <div className="absolute bottom-0 left-0 p-6 w-full flex justify-between items-end border-t border-slate-800 bg-slate-900/60 backdrop-blur-sm">
                               <div className="w-3/4">
-                                <p className="text-xs font-bold uppercase text-slate-400 mb-1 tracking-widest">Navigazione</p>
+                                <p className="text-xs font-bold uppercase text-slate-400 mb-1 tracking-widest">{t('common.navigation')}</p>
                                 <p className="text-lg font-bold truncate pr-4 text-white">{m.location}</p>
                               </div>
                               <Button className="w-12 h-12 bg-white text-slate-900 hover:bg-slate-200 rounded-2xl shadow-xl flex items-center justify-center shrink-0 p-0" onClick={() => openNavigation(m.location)}>
@@ -395,18 +399,18 @@ export function AgendaSportView() {
 
                         <div className="xl:col-span-5 xl:row-span-1 grid grid-cols-2 gap-4 xl:gap-6">
                           <Card className="flex flex-col justify-between h-full hover:bg-slate-800/80 transition-colors p-5 cursor-pointer border-slate-700/50 min-h-[140px]" onClick={() => shareMatch(m)}>
-                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Condividi Info</div>
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">{t('common.shareInfo')}</div>
                             <div className="bg-indigo-500/20 text-indigo-400 w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center mb-2 mx-auto sm:mx-0">
-                              <Share2 className="w-5 h-5 md:w-6 md:h-6" />
+                               <Share2 className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
-                            <p className="text-sm font-medium text-slate-300 text-center sm:text-left line-clamp-2">Invia dettagli della partita</p>
+                            <p className="text-sm font-medium text-slate-300 text-center sm:text-left line-clamp-2">{t('common.share')}</p>
                           </Card>
                           <Card className="flex flex-col justify-between h-full bg-indigo-900/20 border-indigo-500/20 p-5 min-h-[140px]">
-                            <div className="text-[10px] font-bold text-indigo-400/80 uppercase tracking-widest mb-2">Promemoria</div>
+                            <div className="text-[10px] font-bold text-indigo-400/80 uppercase tracking-widest mb-2">{t('common.reminders')}</div>
                             <div className="bg-indigo-600 text-white w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center mb-2 mx-auto sm:mx-0">
                               <Bell className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
-                            <p className="text-sm font-medium text-indigo-200 text-center sm:text-left">Attivo ({m.reminders[0]} min)</p>
+                            <p className="text-sm font-medium text-indigo-200 text-center sm:text-left">{t('common.active')} ({m.reminders[0]} {t('common.minutes')})</p>
                           </Card>
                         </div>
                       </React.Fragment>
@@ -429,8 +433,8 @@ export function AgendaSportView() {
                           <p className="text-xs text-slate-400 truncate flex items-center"><MapPin className="w-3 h-3 mr-1 shrink-0" /> {m.location}</p>
                         </div>
                         <div className="flex gap-2 mt-4 pt-4 border-t border-slate-800">
-                          <Button variant="secondary" size="sm" className="flex-1 py-1 h-8 bg-slate-800 hover:bg-indigo-600 text-xs" onClick={() => openNavigation(m.location)}>Naviga</Button>
-                          <Button variant="secondary" size="sm" className="flex-1 py-1 h-8 bg-slate-800 hover:bg-slate-700 text-xs" onClick={() => shareMatch(m)}>Condividi</Button>
+                          <Button variant="secondary" size="sm" className="flex-1 py-1 h-8 bg-slate-800 hover:bg-indigo-600 text-xs" onClick={() => openNavigation(m.location)}>{t('common.navigation')}</Button>
+                          <Button variant="secondary" size="sm" className="flex-1 py-1 h-8 bg-slate-800 hover:bg-slate-700 text-xs" onClick={() => shareMatch(m)}>{t('common.share')}</Button>
                         </div>
                       </Card>
                     )
@@ -448,25 +452,25 @@ export function AgendaSportView() {
           {showArenaForm ? (
             <Card className="mb-8 max-w-2xl mx-auto">
               <CardHeader>
-                <CardTitle className="text-2xl font-black italic">{editingArenaId ? "Modifica Palazzetto" : "Nuovo Palazzetto"}</CardTitle>
+                <CardTitle className="text-2xl font-black italic">{editingArenaId ? t('agenda.sport.arenas.editArena') : t('agenda.sport.arenas.newArena')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveArena} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="arena_name">Nome Palazzetto</Label>
+                    <Label htmlFor="arena_name">{t('agenda.sport.arenas.name')}</Label>
                     <Input id="arena_name" placeholder="es. PalaLido" value={arenaFormData.name} onChange={e => setArenaFormData({...arenaFormData, name: e.target.value})} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="arena_address">Indirizzo completo</Label>
+                    <Label htmlFor="arena_address">{t('agenda.sport.arenas.address')}</Label>
                     <Input id="arena_address" placeholder="es. Viale dello Sport 1, Milano" value={arenaFormData.address} onChange={e => setArenaFormData({...arenaFormData, address: e.target.value})} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="arena_contacts">Contatti / Telefono</Label>
+                    <Label htmlFor="arena_contacts">{t('agenda.sport.arenas.contacts')}</Label>
                     <Input id="arena_contacts" placeholder="es. 02 1234567" value={arenaFormData.contacts} onChange={e => setArenaFormData({...arenaFormData, contacts: e.target.value})} />
                   </div>
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={() => { setShowArenaForm(false); setEditingArenaId(null); }}>Annulla</Button>
-                    <Button type="submit">Salva</Button>
+                    <Button type="button" variant="outline" onClick={() => { setShowArenaForm(false); setEditingArenaId(null); }}>{t('common.cancel')}</Button>
+                    <Button type="submit">{t('common.save')}</Button>
                   </div>
                 </form>
               </CardContent>
@@ -476,8 +480,8 @@ export function AgendaSportView() {
               {arenas.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.address.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
                 <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-20 text-slate-500 border border-dashed rounded-3xl border-slate-700 bg-slate-900/50">
                   <MapIcon className="w-16 h-16 mx-auto mb-6 opacity-40 text-emerald-500" />
-                  <p className="text-lg font-medium text-slate-400 mb-4">Nessun palazzetto trovato.</p>
-                  <Button onClick={() => {setShowArenaForm(true); setSearchQuery('');}}>Aggiungi il primo palazzetto</Button>
+                  <p className="text-lg font-medium text-slate-400 mb-4">{t('agenda.sport.arenas.empty')}</p>
+                  <Button onClick={() => {setShowArenaForm(true); setSearchQuery('');}}>{t('agenda.sport.arenas.addFirst')}</Button>
                 </div>
               ) : (
                 arenas.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.address.toLowerCase().includes(searchQuery.toLowerCase())).map((a) => (
@@ -505,7 +509,7 @@ export function AgendaSportView() {
                       )}
                     </div>
                     <div className="flex gap-2 mt-4 pt-4 border-t border-slate-800">
-                      <Button variant="secondary" size="sm" className="flex-1 py-1 h-8 bg-slate-800 hover:bg-emerald-600 text-xs" onClick={() => openNavigation(a.address)}>Navigami Qui</Button>
+                      <Button variant="secondary" size="sm" className="flex-1 py-1 h-8 bg-slate-800 hover:bg-emerald-600 text-xs" onClick={() => openNavigation(a.address)}>{t('agenda.sport.arenas.navigate')}</Button>
                     </div>
                   </Card>
                 ))

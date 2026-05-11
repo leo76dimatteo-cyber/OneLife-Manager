@@ -2,9 +2,11 @@ import React, { useState, useRef } from 'react';
 import { auth } from '../db/firebase';
 import { updatePassword } from 'firebase/auth';
 import { db } from '../db/db';
-import { Settings, Save, Download, Upload, Shield, Palette } from 'lucide-react';
+import { Settings, Save, Download, Upload, Shield, Palette, Languages } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button } from '../components/ui';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/utils';
+import { toast } from 'sonner';
 
 const COLORS = [
   { name: 'Default', value: 'rgba(51, 65, 85, 0.5)' },
@@ -17,6 +19,7 @@ const COLORS = [
 ];
 
 export function ImpostazioniView() {
+  const { t, i18n } = useTranslation();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
@@ -27,7 +30,7 @@ export function ImpostazioniView() {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setAuthError('Le password non coincidono');
+      setAuthError(t('settings.security.errorMismatch'));
       return;
     }
     try {
@@ -39,7 +42,7 @@ export function ImpostazioniView() {
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        setAuthError('Utente non autenticato');
+        setAuthError(t('settings.security.errorUnauthentic'));
       }
     } catch (err) {
       console.error(err);
@@ -66,7 +69,7 @@ export function ImpostazioniView() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export error:', err);
-      alert('Errore durante il backup dei dati');
+      toast.error(t('settings.backup.exportError', 'Errore durante il backup dei dati'));
     }
   };
 
@@ -91,17 +94,32 @@ export function ImpostazioniView() {
         if (data.arenas) { await db.arenas.clear(); await db.arenas.bulkAdd(data.arenas); }
         if (data.syncInfo) { await db.syncInfo.clear(); await db.syncInfo.bulkAdd(data.syncInfo); }
       });
-      alert('Dati ripristinati con successo!');
-      window.location.reload(); // Reload to refresh all views 
+      toast.success(t('settings.backup.importSuccess'));
+      setTimeout(() => window.location.reload(), 1500); // Reload to refresh all views 
     } catch (err) {
       console.error('Import error:', err);
-      alert('Errore durante il ripristino dei dati. Verifica che il file sia corretto.');
+      toast.error(t('settings.backup.importError'));
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
+
+  const clearTranslationCache = async () => {
+    await db.translations.clear();
+    toast.success(t('settings.language.cacheCleared', 'Translation cache cleared. Reloader to update.'));
+    setTimeout(() => window.location.reload(), 1500);
+  };
+
+  const commonLanguages = [
+    { code: 'it', name: 'Italiano' },
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' },
+    { code: 'fr', name: 'Français' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'pt', name: 'Português' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -110,8 +128,8 @@ export function ImpostazioniView() {
           <Settings className="w-6 h-6 text-indigo-400" />
         </div>
         <div>
-          <h1 className="text-3xl font-black italic uppercase tracking-tight text-white mb-1">Impostazioni</h1>
-          <p className="text-sm text-slate-400 font-medium">Gestisci il tuo profilo e i tuoi dati</p>
+          <h1 className="text-3xl font-black italic uppercase tracking-tight text-white mb-1">{t('settings.title')}</h1>
+          <p className="text-sm text-slate-400 font-medium">{t('settings.subtitle')}</p>
         </div>
       </div>
 
@@ -120,12 +138,12 @@ export function ImpostazioniView() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Palette className="w-5 h-5 text-indigo-400" />
-              Tema e Colori
+              {t('settings.theme.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-sm text-slate-400">Personalizza il colore del bordo delle finestre con tinte vivaci e fluorescenti.</p>
+              <p className="text-sm text-slate-400">{t('settings.theme.subtitle')}</p>
               <div className="flex flex-wrap gap-4">
                 {COLORS.map(color => (
                   <button
@@ -151,21 +169,54 @@ export function ImpostazioniView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
+              <Languages className="w-5 h-5 text-indigo-400" />
+              {t('settings.language.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+             <div className="space-y-4">
+               <label className="text-sm font-bold text-slate-300">{t('settings.language.select')}</label>
+               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                 {commonLanguages.map(lng => (
+                   <Button 
+                    key={lng.code}
+                    variant={i18n.language.startsWith(lng.code) ? 'default' : 'outline'}
+                    onClick={() => i18n.changeLanguage(lng.code)}
+                    className="w-full h-10"
+                  >
+                    {lng.name}
+                  </Button>
+                 ))}
+               </div>
+               <div className="pt-4 border-t border-slate-800">
+                 <p className="text-[10px] text-slate-500 italic mb-3">{t('settings.language.auto')}</p>
+                 <Button variant="ghost" size="sm" onClick={clearTranslationCache} className="text-xs text-indigo-400 hover:text-indigo-300 h-8">
+                   <Upload className="w-3.5 h-3.5 mr-1.5" />
+                   {t('settings.language.clearCache', 'Aggiorna traduzioni automatiche')}
+                 </Button>
+               </div>
+             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-indigo-400" />
-              Sicurezza Account
+              {t('settings.security.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               {auth.currentUser?.email && (
                 <div className="mb-4">
-                  <p className="text-sm text-slate-400">Loggato come:</p>
+                  <p className="text-sm text-slate-400">{t('settings.security.loggedInAs')}</p>
                   <p className="font-bold text-white">{auth.currentUser.email}</p>
                 </div>
               )}
               
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-300">Nuova Password</label>
+                <label className="text-sm font-bold text-slate-300">{t('settings.security.newPassword')}</label>
                 <input
                   type="password"
                   value={newPassword}
@@ -175,7 +226,7 @@ export function ImpostazioniView() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-300">Conferma Nuova Password</label>
+                <label className="text-sm font-bold text-slate-300">{t('settings.security.confirmPassword')}</label>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -186,11 +237,11 @@ export function ImpostazioniView() {
               </div>
 
               {authError && <p className="text-red-400 text-sm font-bold">{authError}</p>}
-              {authSuccess && <p className="text-emerald-400 text-sm font-bold">Password aggiornata con successo!</p>}
+              {authSuccess && <p className="text-emerald-400 text-sm font-bold">{t('settings.security.success')}</p>}
 
               <Button type="submit" className="w-full" disabled={!newPassword || newPassword !== confirmPassword}>
                 <Save className="w-4 h-4 mr-2" />
-                Aggiorna Password
+                {t('settings.security.update')}
               </Button>
             </form>
           </CardContent>
@@ -200,18 +251,18 @@ export function ImpostazioniView() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Save className="w-5 h-5 text-indigo-400" />
-              Backup e Ripristino
+              {t('settings.backup.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               <div className="space-y-3">
                 <p className="text-sm text-slate-400">
-                  Esporta tutti i tuoi dati (eventi, contatti, palazzetti) in un file JSON.
+                  {t('settings.backup.exportDesc')}
                 </p>
                 <Button onClick={handleExportData} className="w-full bg-slate-800 hover:bg-slate-700 text-white">
                   <Download className="w-4 h-4 mr-2" />
-                  Effettua Backup
+                  {t('settings.backup.exportBtn')}
                 </Button>
               </div>
 
@@ -219,7 +270,7 @@ export function ImpostazioniView() {
 
               <div className="space-y-3">
                 <p className="text-sm text-slate-400">
-                  Ripristina i dati da un file di backup precedente. <strong className="text-red-400">Attenzione: questo sovrascriverà tutti i dati attuali!</strong>
+                  {t('settings.backup.importDesc')} <strong className="text-red-400">{t('settings.backup.importWarning')}</strong>
                 </p>
                 <input 
                   type="file" 
@@ -230,7 +281,7 @@ export function ImpostazioniView() {
                 />
                 <Button onClick={handleImportClick} variant="outline" className="w-full text-red-400 border-red-900 hover:bg-red-950 hover:text-red-300">
                   <Upload className="w-4 h-4 mr-2" />
-                  Ripristina da Backup
+                  {t('settings.backup.importBtn')}
                 </Button>
               </div>
             </div>

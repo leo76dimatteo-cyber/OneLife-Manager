@@ -1,0 +1,189 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "agendaSport": "Sport Agenda",
+    "agendaPersonal": "Personal Agenda",
+    "rubrica": "Contacts",
+    "navigatore": "GPS Navigator",
+    "impostazioni": "Settings",
+    "guida": "Guide",
+    "logout": "Logout",
+    "mainMenu": "Main Menu",
+    "user": "User",
+    "enableNotifications": "Enable Notifications",
+    "notificationsOn": "Notifications On",
+    "testNotification": "Test Notification",
+    "online": "Online",
+    "viewMore": "View More",
+    "viewAll": "View All",
+    "filterAll": "All",
+    "filterSport": "Sport",
+    "filterPersonal": "Personal",
+    "search": "Search...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "nextMeeting": "Next Inbound",
+    "navigation": "Navigation",
+    "share": "Share",
+    "shareInfo": "Share Info",
+    "shareSuccess": "Details copied!",
+    "importSuccessCount": "Imported {{count}} event(s) successfully!",
+    "reminders": "Reminders",
+    "minutes": "minutes",
+    "active": "Active",
+    "notificationsEnabled": "Notifications On",
+    "notificationsActiveMsg": "Notifications activated successfully! 🎉"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Weekly Commitments History",
+    "thisWeek": "This Week",
+    "noEvents": "No commitments planned for this week.",
+    "eventType": {
+      "sport": "Sports",
+      "personal": "Personal"
+    }
+  },
+  "navigatore": {
+    "title": "GPS Navigator",
+    "subtitle": "Get to your commitments",
+    "searchTitle": "Search Destination",
+    "viewOnMap": "View on Map",
+    "noArenas": "No arenas found in address book.",
+    "searchPlaceholder": "Search saved address...",
+    "destinationLabel": "Address or Place Name",
+    "destinationPlaceholder": "e.g. Olympic Stadium, Rome",
+    "calculateRoute": "Calculate Route",
+    "savedAddresses": "Saved Addresses",
+    "useCurrentLocation": "Use current location",
+    "errors": {
+      "geolocationDenied": "Unable to get current location. Make sure permissions are active.",
+      "geolocationUnsupported": "Your browser does not support geolocation."
+    }
+  },
+  "agenda": {
+    "export": "Export ICS",
+    "import": "Import matches",
+    "personal": {
+      "title": "Personal Agenda",
+      "subtitle": "Your commitments and workouts",
+      "newEvent": "New Event",
+      "editEvent": "Edit Event",
+      "eventTitle": "Event Title",
+      "eventTitlePlaceholder": "e.g. Gym Training",
+      "eventDate": "Date and Time",
+      "eventLocation": "Location",
+      "eventLocationPlaceholder": "e.g. Sports Center, Via Roma 1",
+      "eventNotes": "Notes",
+      "eventNotesPlaceholder": "Details...",
+      "empty": "No personal events found.",
+      "addFirst": "Add your first event"
+    },
+    "sport": {
+      "title": "Sport Agenda",
+      "subtitle": "Match management and team logistics",
+      "newMatch": "New Match",
+      "editMatch": "Edit Match",
+      "matchTitle": "Title / Teams",
+      "matchTitlePlaceholder": "e.g. Lakers vs Bulls",
+      "matchDate": "Date and Time",
+      "matchLocation": "Location",
+      "matchLocationPlaceholder": "Search saved arena...",
+      "matchNotes": "Notes",
+      "matchNotesPlaceholder": "Details...",
+      "empty": "No matches found.",
+      "addFirst": "Add your first match",
+      "tabs": {
+        "matches": "Matches",
+        "arenas": "Arenas"
+      },
+      "arenas": {
+        "title": "Arenas",
+        "subtitle": "Saved team venues",
+        "newArena": "New Arena",
+        "editArena": "Edit Arena",
+        "name": "Arena Name",
+        "namePlaceholder": "Arena Name",
+        "address": "Full Address",
+        "addressPlaceholder": "Full Address",
+        "contacts": "Contacts / Phone",
+        "contactsPlaceholder": "Contacts / Phone",
+        "empty": "No arenas found.",
+        "addFirst": "Add your first arena",
+        "navigate": "Navigate me here"
+      }
+    }
+  },
+  "contacts": {
+    "title": "Contacts",
+    "subtitle": "Manage sport and personal contacts",
+    "newContact": "New Contact",
+    "editContact": "Edit Contact",
+    "name": "Name / Nickname",
+    "type": "Contact Type",
+    "phone": "Phone",
+    "email": "Email",
+    "notes": "Notes (Role, Team, etc.)",
+    "empty": "No contacts found in this address book.",
+    "addFirst": "Add the first contact",
+    "sport": "Sport",
+    "personal": "Personal"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your profile and data",
+    "theme": {
+      "title": "Theme and Colors",
+      "subtitle": "Customize window border colors with vibrant fluorescent shades."
+    },
+    "language": {
+      "title": "Language",
+      "select": "Select Language",
+      "auto": "The app automatically detects your browser language. If a translation is not available in the files, it will be generated automatically via AI for all spoken languages.",
+      "clearCache": "Refresh automatic translations",
+      "cacheCleared": "Translation cache cleared. Reloader to update."
+    },
+    "security": {
+      "title": "Account Security",
+      "loggedInAs": "Logged in as:",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "update": "Update Password",
+      "success": "Password updated successfully!",
+      "errorMismatch": "Passwords do not match",
+      "errorUnauthentic": "User not authenticated"
+    },
+    "backup": {
+      "title": "Backup and Restore",
+      "exportDesc": "Export all your data (events, contacts, arenas) to a JSON file.",
+      "exportBtn": "Perform Backup",
+      "importDesc": "Restore data from a previous backup file.",
+      "importWarning": "Warning: this will overwrite all current data!",
+      "importBtn": "Restore from Backup",
+      "importSuccess": "Data restored successfully!",
+      "importError": "Error during data restore. Check that the file is correct."
+    }
+  },
+  "login": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "loginWithEmail": "Login with Email",
+    "registerWithEmail": "Register with Email",
+    "googleLogin": "Login with Google",
+    "or": "OR",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "errors": {
+      "cancelled": "Login cancelled.",
+      "unauthorized": "Unauthorized domain in Firebase. Add it to the console.",
+      "googleError": "Error during Google login.",
+      "invalidCredentials": "Invalid email or password.",
+      "emailInUse": "This email is already in use.",
+      "authError": "Authentication error."
+    }
+  }
+}
