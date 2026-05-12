@@ -1,10 +1,10 @@
 {
-  "projectId": "diario-diabete-4be2f",
-  "appId": "1:242834267396:web:8878612a92e8201e9c4451",
-  "apiKey": "AIzaSyCBsIffqxP6Jeanp64aKV_Hz_OdInoFEOQ",
-  "authDomain": "diario-diabete-4be2f.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-6cd84a90-1c51-4736-a350-db787490b44b",
-  "storageBucket": "diario-diabete-4be2f.firebasestorage.app",
-  "messagingSenderId": "242834267396",
+  "projectId": "onelife-manager",
+  "appId": "1:580736545808:web:fbb5d69e784843ecae0695",
+  "apiKey": "AIzaSyAoPnDlMc6G0p5AcvVMI1wuUf3fCaAY_fY",
+  "authDomain": "onelife-manager.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "onelife-manager.firebasestorage.app",
+  "messagingSenderId": "580736545808",
   "measurementId": ""
 }

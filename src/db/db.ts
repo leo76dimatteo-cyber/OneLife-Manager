@@ -42,29 +42,13 @@ export interface SyncConfig {
   calendarUrl?: string; // used if we support external sync
 }
 
-export interface Translation {
-  lng: string;
-  data: any;
-  updatedAt: number;
-}
-
 const db = new Dexie('AgendaPartiteDB') as Dexie & {
   matches: EntityTable<MatchEvent, 'id'>;
   personalEvents: EntityTable<PersonalEvent, 'id'>;
   contacts: EntityTable<Contact, 'id'>;
   arenas: EntityTable<Arena, 'id'>;
   syncInfo: EntityTable<SyncConfig, 'id'>;
-  translations: EntityTable<Translation, 'lng'>;
 };
-
-db.version(4).stores({
-  matches: 'id, date, location, isSynced',
-  personalEvents: 'id, date',
-  contacts: 'id, type, name',
-  arenas: 'id, name',
-  syncInfo: 'id',
-  translations: 'lng'
-});
 
 db.version(3).stores({
   matches: 'id, date, location, isSynced',

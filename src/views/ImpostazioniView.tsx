@@ -2,11 +2,10 @@ import React, { useState, useRef } from 'react';
 import { auth } from '../db/firebase';
 import { updatePassword } from 'firebase/auth';
 import { db } from '../db/db';
+import { useTranslation } from 'react-i18next';
 import { Settings, Save, Download, Upload, Shield, Palette, Languages } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Button } from '../components/ui';
-import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/utils';
-import { toast } from 'sonner';
 
 const COLORS = [
   { name: 'Default', value: 'rgba(51, 65, 85, 0.5)' },
@@ -16,6 +15,14 @@ const COLORS = [
   { name: 'Fluo Yellow', value: '#eaff00' },
   { name: 'Fluo Orange', value: '#ff5e00' },
   { name: 'Fluo Purple', value: '#b026ff' },
+];
+
+const LANGUAGES = [
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
 ];
 
 export function ImpostazioniView() {
@@ -30,7 +37,7 @@ export function ImpostazioniView() {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setAuthError(t('settings.security.errorMismatch'));
+      setAuthError(t('settings.pass-mismatch'));
       return;
     }
     try {
@@ -42,7 +49,7 @@ export function ImpostazioniView() {
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        setAuthError(t('settings.security.errorUnauthentic'));
+        setAuthError(t('settings.auth-error'));
       }
     } catch (err) {
       console.error(err);
@@ -69,7 +76,7 @@ export function ImpostazioniView() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export error:', err);
-      toast.error(t('settings.backup.exportError', 'Errore durante il backup dei dati'));
+      alert(t('settings.backup-error'));
     }
   };
 
@@ -94,32 +101,17 @@ export function ImpostazioniView() {
         if (data.arenas) { await db.arenas.clear(); await db.arenas.bulkAdd(data.arenas); }
         if (data.syncInfo) { await db.syncInfo.clear(); await db.syncInfo.bulkAdd(data.syncInfo); }
       });
-      toast.success(t('settings.backup.importSuccess'));
-      setTimeout(() => window.location.reload(), 1500); // Reload to refresh all views 
+      alert(t('settings.restore-success'));
+      window.location.reload(); // Reload to refresh all views 
     } catch (err) {
       console.error('Import error:', err);
-      toast.error(t('settings.backup.importError'));
+      alert(t('settings.restore-error'));
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
-
-  const clearTranslationCache = async () => {
-    await db.translations.clear();
-    toast.success(t('settings.language.cacheCleared', 'Translation cache cleared. Reloader to update.'));
-    setTimeout(() => window.location.reload(), 1500);
-  };
-
-  const commonLanguages = [
-    { code: 'it', name: 'Italiano' },
-    { code: 'en', name: 'English' },
-    { code: 'es', name: 'Español' },
-    { code: 'fr', name: 'Français' },
-    { code: 'de', name: 'Deutsch' },
-    { code: 'pt', name: 'Português' },
-  ];
 
   return (
     <div className="space-y-6">
@@ -138,12 +130,12 @@ export function ImpostazioniView() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Palette className="w-5 h-5 text-indigo-400" />
-              {t('settings.theme.title')}
+              {t('settings.theme')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-sm text-slate-400">{t('settings.theme.subtitle')}</p>
+              <p className="text-sm text-slate-400">{t('settings.theme-desc')}</p>
               <div className="flex flex-wrap gap-4">
                 {COLORS.map(color => (
                   <button
@@ -166,36 +158,35 @@ export function ImpostazioniView() {
           </CardContent>
         </Card>
 
+        {/* New Language Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Languages className="w-5 h-5 text-indigo-400" />
-              {t('settings.language.title')}
+              {t('settings.language')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-             <div className="space-y-4">
-               <label className="text-sm font-bold text-slate-300">{t('settings.language.select')}</label>
-               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                 {commonLanguages.map(lng => (
-                   <Button 
-                    key={lng.code}
-                    variant={i18n.language.startsWith(lng.code) ? 'default' : 'outline'}
-                    onClick={() => i18n.changeLanguage(lng.code)}
-                    className="w-full h-10"
+            <div className="space-y-4">
+              <p className="text-sm text-slate-400">{t('settings.language-desc')}</p>
+              <div className="grid grid-cols-2 gap-3">
+                {LANGUAGES.map(lang => (
+                  <button
+                    key={lang.code}
+                    onClick={() => i18n.changeLanguage(lang.code)}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-xl border transition-all duration-200",
+                      i18n.language === lang.code 
+                        ? "bg-indigo-600/20 border-indigo-500 text-white" 
+                        : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:bg-slate-800"
+                    )}
                   >
-                    {lng.name}
-                  </Button>
-                 ))}
-               </div>
-               <div className="pt-4 border-t border-slate-800">
-                 <p className="text-[10px] text-slate-500 italic mb-3">{t('settings.language.auto')}</p>
-                 <Button variant="ghost" size="sm" onClick={clearTranslationCache} className="text-xs text-indigo-400 hover:text-indigo-300 h-8">
-                   <Upload className="w-3.5 h-3.5 mr-1.5" />
-                   {t('settings.language.clearCache', 'Aggiorna traduzioni automatiche')}
-                 </Button>
-               </div>
-             </div>
+                    <span className="text-xl">{lang.flag}</span>
+                    <span className="font-bold text-sm">{lang.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -203,20 +194,20 @@ export function ImpostazioniView() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-indigo-400" />
-              {t('settings.security.title')}
+              {t('settings.account')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               {auth.currentUser?.email && (
                 <div className="mb-4">
-                  <p className="text-sm text-slate-400">{t('settings.security.loggedInAs')}</p>
+                  <p className="text-sm text-slate-400">{t('settings.logged-as')}</p>
                   <p className="font-bold text-white">{auth.currentUser.email}</p>
                 </div>
               )}
               
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-300">{t('settings.security.newPassword')}</label>
+                <label className="text-sm font-bold text-slate-300">{t('settings.new-password')}</label>
                 <input
                   type="password"
                   value={newPassword}
@@ -226,7 +217,7 @@ export function ImpostazioniView() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-300">{t('settings.security.confirmPassword')}</label>
+                <label className="text-sm font-bold text-slate-300">{t('settings.confirm-password')}</label>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -237,40 +228,38 @@ export function ImpostazioniView() {
               </div>
 
               {authError && <p className="text-red-400 text-sm font-bold">{authError}</p>}
-              {authSuccess && <p className="text-emerald-400 text-sm font-bold">{t('settings.security.success')}</p>}
+              {authSuccess && <p className="text-emerald-400 text-sm font-bold">{t('settings.pass-success')}</p>}
 
               <Button type="submit" className="w-full" disabled={!newPassword || newPassword !== confirmPassword}>
                 <Save className="w-4 h-4 mr-2" />
-                {t('settings.security.update')}
+                {t('settings.update-password')}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Save className="w-5 h-5 text-indigo-400" />
-              {t('settings.backup.title')}
+              {t('settings.backup')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               <div className="space-y-3">
                 <p className="text-sm text-slate-400">
-                  {t('settings.backup.exportDesc')}
+                  {t('settings.backup-desc')}
                 </p>
                 <Button onClick={handleExportData} className="w-full bg-slate-800 hover:bg-slate-700 text-white">
                   <Download className="w-4 h-4 mr-2" />
-                  {t('settings.backup.exportBtn')}
+                  {t('settings.backup-btn')}
                 </Button>
               </div>
 
-              <div className="w-full h-px bg-slate-800"></div>
-
               <div className="space-y-3">
                 <p className="text-sm text-slate-400">
-                  {t('settings.backup.importDesc')} <strong className="text-red-400">{t('settings.backup.importWarning')}</strong>
+                  {t('settings.restore-desc')} <strong className="text-red-400">{t('settings.restore-warn')}</strong>
                 </p>
                 <input 
                   type="file" 
@@ -281,7 +270,7 @@ export function ImpostazioniView() {
                 />
                 <Button onClick={handleImportClick} variant="outline" className="w-full text-red-400 border-red-900 hover:bg-red-950 hover:text-red-300">
                   <Upload className="w-4 h-4 mr-2" />
-                  {t('settings.backup.importBtn')}
+                  {t('settings.restore-btn')}
                 </Button>
               </div>
             </div>

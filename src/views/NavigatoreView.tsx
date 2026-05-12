@@ -2,15 +2,12 @@ import React, { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../db/db";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from "../components/ui";
-import { useTranslation } from "react-i18next";
 import { MapPin as MapIcon, Navigation, Search, Flag, MapPin } from "lucide-react";
 import { cn } from "../lib/utils";
-import { toast } from "sonner";
 
 import { isIOS, openNavigation as navigateTo } from "../lib/nav";
 
 export function NavigatoreView() {
-  const { t } = useTranslation();
   const arenas = useLiveQuery(() => db.arenas.orderBy("name").toArray()) || [];
   const [destination, setDestination] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,10 +18,10 @@ export function NavigatoreView() {
         const { latitude, longitude } = position.coords;
         setDestination(`${latitude},${longitude}`);
       }, (error) => {
-        toast.error(t('navigatore.errors.geolocationDenied', 'Impossibile ottenere la posizione attuale. Assicurati che i permessi siano attivi.'));
+        alert("Impossibile ottenere la posizione attuale. Assicurati che i permessi siano attivi.");
       });
     } else {
-      toast.error(t('navigatore.errors.geolocationUnsupported', 'Il tuo browser non supporta la geolocalizzazione.'));
+      alert("Il tuo browser non supporta la geolocalizzazione.");
     }
   };
 
@@ -49,23 +46,23 @@ export function NavigatoreView() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">{t('navigatore.title')}</h2>
-        <p className="text-slate-400 text-sm mt-1">{t('navigatore.subtitle')}</p>
+        <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">Navigatore GPS</h2>
+        <p className="text-slate-400 text-sm mt-1">Trova luoghi di incontro e avvia la navigazione</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
         <Card className="lg:col-span-5 p-0 overflow-hidden flex flex-col min-h-[400px]">
           <CardHeader className="bg-slate-900 border-b border-slate-800">
-            <CardTitle className="text-xl flex items-center gap-2"><Search className="w-5 h-5 text-indigo-400" /> {t('navigatore.searchTitle', 'Cerca Destinazione')}</CardTitle>
+            <CardTitle className="text-xl flex items-center gap-2"><Search className="w-5 h-5 text-indigo-400" /> Cerca Destinazione</CardTitle>
           </CardHeader>
           <CardContent className="p-6 flex-1 flex flex-col justify-center">
             <form onSubmit={handleNavigate} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="destination">{t('navigatore.destinationLabel')}</Label>
+                <Label htmlFor="destination">Indirizzo o Nome del Luogo</Label>
                 <div className="relative">
                   <Input 
                     id="destination" 
-                    placeholder={t('navigatore.destinationPlaceholder')} 
+                    placeholder="es. Stadio Olimpico, Roma" 
                     value={destination} 
                     onChange={e => setDestination(e.target.value)} 
                     className="h-12 md:h-14 text-base md:text-lg pr-12"
@@ -75,7 +72,7 @@ export function NavigatoreView() {
                     type="button"
                     onClick={useCurrentLocation}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-300 transition-colors"
-                    title={t('navigatore.useCurrentLocation')}
+                    title="Usa posizione attuale"
                   >
                     <MapPin className="w-5 h-5" />
                   </button>
@@ -83,10 +80,10 @@ export function NavigatoreView() {
               </div>
               <div className="flex flex-col gap-3">
                 <Button type="submit" size="lg" className="w-full h-12 md:h-14 text-base md:text-lg" disabled={!destination.trim()}>
-                  <Navigation className="w-5 h-5 mr-2" /> {t('navigatore.calculateRoute')}
+                  <Navigation className="w-5 h-5 mr-2" /> Avvia Navigazione
                 </Button>
                 <Button type="button" variant="secondary" size="lg" className="w-full h-12 md:h-14 text-base md:text-lg" disabled={!destination.trim()} onClick={handleSearch}>
-                  <MapIcon className="w-5 h-5 mr-2" /> {t('navigatore.viewOnMap', 'Guarda sulla Mappa')}
+                  <MapIcon className="w-5 h-5 mr-2" /> Guarda sulla Mappa
                 </Button>
               </div>
             </form>
@@ -95,11 +92,11 @@ export function NavigatoreView() {
 
         <Card className="lg:col-span-7 bg-slate-800 border-slate-700 min-h-[400px] flex flex-col p-0">
           <CardHeader className="bg-slate-900 border-b border-slate-800 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-            <CardTitle className="text-xl flex items-center gap-2"><MapPin className="w-5 h-5 text-emerald-400" /> {t('navigatore.savedAddresses')}</CardTitle>
+            <CardTitle className="text-xl flex items-center gap-2"><MapPin className="w-5 h-5 text-emerald-400" /> I Tuoi Palazzetti</CardTitle>
             <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
               <Input 
-                placeholder={t('navigatore.searchPlaceholder')} 
+                placeholder="Filtra palazzetti..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-9 w-full bg-slate-950 border-slate-800"
@@ -110,7 +107,7 @@ export function NavigatoreView() {
             {filteredArenas.length === 0 ? (
                <div className="text-center py-12 text-slate-500">
                  <MapIcon className="w-12 h-12 mx-auto mb-4 opacity-40 text-slate-400" />
-                 <p>{t('navigatore.noArenas', 'Nessun palazzetto trovato in rubrica.')}</p>
+                 <p>Nessun palazzetto trovato in rubrica.</p>
                </div>
             ) : (
               <div className="space-y-3">

@@ -13,7 +13,7 @@ export default defineConfig(({mode}) => {
       VitePWA({
         registerType: 'autoUpdate',
         devOptions: {
-          enabled: false
+          enabled: true
         },
         manifest: {
           name: 'OneLife-Manager',

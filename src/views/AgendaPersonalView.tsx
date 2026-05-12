@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import i18n from "../lib/i18n";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { v4 as uuidv4 } from "uuid";
@@ -10,11 +8,9 @@ import { generateIcs } from "../lib/calendar";
 import { cn } from "../lib/utils";
 import { openNavigation } from "../lib/nav";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Textarea } from "../components/ui";
-import { MapPin, Calendar, Plus, Trash2, Edit2, MapPin as MapIcon, Download, Search, Book, Clock, Share2, Navigation } from "lucide-react";
-import { toast } from "sonner";
+import { MapPin, Calendar, Plus, Trash2, Edit2, MapPin as MapIcon, Download, Search, Book } from "lucide-react";
 
 export function AgendaPersonalView() {
-  const { t } = useTranslation();
   const events = useLiveQuery(() => db.personalEvents.orderBy("date").toArray()) || [];
   const arenas = useLiveQuery(() => db.arenas.orderBy("name").toArray()) || [];
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,19 +58,8 @@ export function AgendaPersonalView() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm(t('common.confirmDelete'))) {
+    if (confirm("Sei sicuro di voler eliminare questo evento?")) {
       await db.personalEvents.delete(id);
-    }
-  };
-
-  const shareEvent = async (ev: PersonalEvent) => {
-    const dateStr = format(ev.date, "EEEE d MMMM yyyy, HH:mm", { locale: i18n.language === 'it' ? it : undefined });
-    const text = `${t('agenda.personal.eventTitle')}: ${ev.title}\n📅 ${t('agenda.personal.eventDate')}: ${dateStr}\n📍 ${t('agenda.personal.eventLocation')}: ${ev.location}${ev.notes ? `\n📝 ${t('agenda.personal.eventNotes')}: ${ev.notes}` : ''}`;
-    if (navigator.share) {
-      try { await navigator.share({ title: t('common.shareInfo'), text }); } catch (err) {}
-    } else {
-      navigator.clipboard.writeText(text);
-      toast.success(t('common.shareSuccess'));
     }
   };
 
@@ -94,15 +79,15 @@ export function AgendaPersonalView() {
     <div className="w-full">
       <div className="flex justify-between items-start sm:items-center mb-8 gap-4 flex-col sm:flex-row">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">{t('agenda.personal.title')}</h2>
-          <p className="text-slate-400 text-sm mt-1">{t('agenda.personal.subtitle')}</p>
+          <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">Agenda Personale</h2>
+          <p className="text-slate-400 text-sm mt-1">I tuoi impegni e allenamenti</p>
         </div>
         <div className="flex gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
           {!showForm && (
             <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
               <Input 
-                placeholder={t('common.search')} 
+                placeholder="Cerca..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-9 w-full bg-slate-900 border-slate-800"
@@ -110,15 +95,15 @@ export function AgendaPersonalView() {
             </div>
           )}
           {!showForm && events.length > 0 && (
-             <Button variant="outline" size="sm" onClick={exportCalendar} title={t('agenda.export')}>
+             <Button variant="outline" size="sm" onClick={exportCalendar} title="Esporta al Calendario">
                <Download className="w-4 h-4 md:mr-2" />
-               <span className="hidden md:inline">{t('agenda.export')}</span>
+               <span className="hidden md:inline">Esporta</span>
              </Button>
           )}
           {!showForm && (
             <Button onClick={() => setShowForm(true)}>
               <Plus className="w-4 h-4 md:mr-1" />
-              <span className="hidden md:inline">{t('agenda.personal.newEvent')}</span>
+              <span className="hidden md:inline">Nuovo</span>
             </Button>
           )}
         </div>
@@ -127,24 +112,24 @@ export function AgendaPersonalView() {
       {showForm ? (
         <Card className="mb-8 max-w-2xl mx-auto">
           <CardHeader>
-            <CardTitle className="text-2xl font-black italic">{editingId ? t('agenda.personal.editEvent') : t('agenda.personal.newEvent')}</CardTitle>
+            <CardTitle className="text-2xl font-black italic">{editingId ? "Modifica Evento" : "Nuovo Evento"}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">{t('agenda.personal.eventTitle')}</Label>
-                <Input id="title" placeholder={t('agenda.personal.eventTitlePlaceholder', 'es. Allenamento Palestra')} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
+                <Label htmlFor="title">Titolo Evento</Label>
+                <Input id="title" placeholder="es. Allenamento Palestra" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="date">{t('agenda.personal.eventDate')}</Label>
+                <Label htmlFor="date">Data e Ora</Label>
                 <Input id="date" type="datetime-local" value={formData.date ? format(typeof formData.date === 'string' ? new Date(formData.date) : formData.date, "yyyy-MM-dd'T'HH:mm") : ""} onChange={e => setFormData({...formData, date: new Date(e.target.value)})} required />
               </div>
               <div className="space-y-2 relative">
-                <Label htmlFor="location">{t('agenda.personal.eventLocation')}</Label>
+                <Label htmlFor="location">Luogo / Indirizzo</Label>
                 <div className="flex gap-2">
                   <Input 
                     id="location" 
-                    placeholder={t('agenda.personal.eventLocationPlaceholder', 'es. Centro Sportivo, Via Roma 1')} 
+                    placeholder="es. Centro Sportivo, Via Roma 1" 
                     value={formData.location} 
                     onChange={e => setFormData({...formData, location: e.target.value})} 
                     required 
@@ -154,7 +139,7 @@ export function AgendaPersonalView() {
                       type="button" 
                       variant="outline" 
                       onClick={() => setShowAddressPicker(!showAddressPicker)}
-                      title={t('navigatore.savedAddresses')}
+                      title="Scegli da indirizzi salvati"
                       className="shrink-0 aspect-square p-0 w-10 flex items-center justify-center border-slate-700 bg-slate-800/50"
                     >
                       <Book className="w-4 h-4 text-emerald-400" />
@@ -165,7 +150,7 @@ export function AgendaPersonalView() {
                 {showAddressPicker && arenas.length > 0 && (
                   <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 lg:max-h-48 overflow-y-auto">
                     <div className="p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-950/50">
-                      {t('agenda.sport.arenas.title')}
+                      Indirizzi Salvati
                     </div>
                     <div className="flex flex-col">
                       {arenas.map(arena => (
@@ -187,12 +172,12 @@ export function AgendaPersonalView() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="notes">{t('agenda.personal.eventNotes')}</Label>
-                <Textarea id="notes" placeholder={t('agenda.personal.eventNotesPlaceholder', 'Dettagli...')} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
+                <Label htmlFor="notes">Note Aggiuntive</Label>
+                <Textarea id="notes" placeholder="Dettagli..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
               </div>
               <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>{t('common.cancel')}</Button>
-                <Button type="submit">{t('common.save')}</Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Annulla</Button>
+                <Button type="submit">Salva</Button>
               </div>
             </form>
           </CardContent>
@@ -204,8 +189,8 @@ export function AgendaPersonalView() {
           {events.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.location?.toLowerCase().includes(searchQuery.toLowerCase()) || m.notes?.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
             <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-20 text-slate-500 border border-dashed rounded-3xl border-slate-700 bg-slate-900/50">
               <Calendar className="w-16 h-16 mx-auto mb-6 opacity-40 text-emerald-500" />
-              <p className="text-lg font-medium text-slate-400 mb-4">{t('agenda.personal.empty')}</p>
-              <Button onClick={() => {setShowForm(true); setSearchQuery('');}}>{t('agenda.personal.addFirst')}</Button>
+              <p className="text-lg font-medium text-slate-400 mb-4">Nessun evento personale trovato.</p>
+              <Button onClick={() => {setShowForm(true); setSearchQuery('');}}>Aggiungi il tuo primo evento</Button>
             </div>
           ) : (
             events.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.location?.toLowerCase().includes(searchQuery.toLowerCase()) || m.notes?.toLowerCase().includes(searchQuery.toLowerCase())).map((m) => (
@@ -225,8 +210,7 @@ export function AgendaPersonalView() {
                   <p className="text-xs text-slate-400 truncate flex items-center"><MapPin className="w-3 h-3 mr-1 shrink-0" /> {m.location}</p>
                 </div>
                 <div className="flex gap-2 mt-4 pt-4 border-t border-slate-800">
-                  <Button variant="secondary" size="sm" className="flex-1 py-1 h-8 bg-slate-800 hover:bg-emerald-600 text-xs" onClick={() => openNavigation(m.location)}>{t('common.navigation')}</Button>
-                  <Button variant="secondary" size="sm" className="flex-1 bg-slate-800 hover:bg-slate-700 text-xs h-8" onClick={() => shareEvent(m)}><Share2 className="w-3.5 h-3.5 mr-1.5" />{t('common.share')}</Button>
+                  <Button variant="secondary" size="sm" className="flex-1 py-1 h-8 bg-slate-800 hover:bg-emerald-600 text-xs" onClick={() => openNavigation(m.location)}>Naviga</Button>
                 </div>
               </Card>
             ))

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/db';
 import { startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
-import { it, enUS } from 'date-fns/locale';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui';
+import { it, enUS, es, fr, hi } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui';
 import { CalendarDays, User, Clock, MapPin, Search } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { MatchEvent, PersonalEvent } from '../db/db';
@@ -20,7 +20,15 @@ export function DashboardView() {
   const { t, i18n } = useTranslation();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
 
-  const dateLocale = i18n.language.startsWith('it') ? it : enUS;
+  const getLocale = () => {
+    switch(i18n.language) {
+      case 'en': return enUS;
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'hi': return hi;
+      default: return it;
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,12 +86,14 @@ export function DashboardView() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('dashboard.thisWeek')} ({format(startOfWeek(new Date(), { weekStartsOn: 1 }), "d MMM", { locale: dateLocale })} - {format(endOfWeek(new Date(), { weekStartsOn: 1 }), "d MMM", { locale: dateLocale })})</CardTitle>
+          <CardTitle>
+            {t('dashboard.this-week')} ({format(startOfWeek(new Date(), { weekStartsOn: 1 }), "d MMM", { locale: getLocale() })} - {format(endOfWeek(new Date(), { weekStartsOn: 1 }), "d MMM", { locale: getLocale() })})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {events.length === 0 ? (
             <div className="text-center py-12 text-slate-500 italic">
-              {t('dashboard.noEvents')}
+              {t('dashboard.no-events')}
             </div>
           ) : (
             <div className="space-y-4">
@@ -105,7 +115,9 @@ export function DashboardView() {
                     <div className="flex-1">
                       <div className="flex items-baseline space-x-2">
                         <span className="font-bold text-lg text-white">{event.title}</span>
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 uppercase tracking-widest">{event.type === 'sport' ? t('dashboard.eventType.sport') : t('dashboard.eventType.personal')}</span>
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 uppercase tracking-widest">
+                          {event.type === 'sport' ? t('dashboard.sportive') : t('dashboard.personal')}
+                        </span>
                       </div>
                       {event.subtitle && (
                         <p className="text-sm text-slate-400 mt-1 flex items-center gap-1">
@@ -117,7 +129,7 @@ export function DashboardView() {
                     <div className="flex-shrink-0 flex items-center gap-2 text-slate-300">
                       <Clock className="w-4 h-4 text-slate-500" />
                       <div className="text-right">
-                        <p className="font-bold">{format(event.date, "EEEE d", { locale: dateLocale })}</p>
+                        <p className="font-bold uppercase">{format(event.date, "EEEE d", { locale: getLocale() })}</p>
                         <p className="text-sm text-slate-400">{format(event.date, "HH:mm")}</p>
                       </div>
                     </div>
