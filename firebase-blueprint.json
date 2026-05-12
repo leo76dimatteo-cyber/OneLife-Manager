@@ -5,22 +5,92 @@
       "description": "User profile data",
       "type": "object",
       "properties": {
-        "email": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string"
-        }
+        "email": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["email", "createdAt"]
+    },
+    "MatchEvent": {
+      "title": "Match Event",
+      "description": "Sport match logistics",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "location": { "type": "string" },
+        "notes": { "type": "string" },
+        "reminders": { "type": "array", "items": { "type": "number" } },
+        "isSynced": { "type": "boolean" },
+        "externalId": { "type": "string" }
+      },
+      "required": ["id", "title", "date", "location"]
+    },
+    "PersonalEvent": {
+      "title": "Personal Event",
+      "description": "Personal commitments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "location": { "type": "string" },
+        "notes": { "type": "string" },
+        "reminders": { "type": "array", "items": { "type": "number" } }
+      },
+      "required": ["id", "title", "date", "location"]
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "Contact information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["sport", "personal"] },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "name", "type"]
+    },
+    "Arena": {
+      "title": "Arena",
+      "description": "Team venue information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "contacts": { "type": "string" }
+      },
+      "required": ["id", "name", "address"]
     }
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": {
-        "$ref": "#/entities/User"
-      },
-      "description": "User profile collection"
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile document"
+    },
+    "/users/{userId}/matches/{matchId}": {
+      "schema": { "$ref": "#/entities/MatchEvent" },
+      "description": "Sport matches for the user"
+    },
+    "/users/{userId}/personalEvents/{eventId}": {
+      "schema": { "$ref": "#/entities/PersonalEvent" },
+      "description": "Personal events for the user"
+    },
+    "/users/{userId}/contacts/{contactId}": {
+      "schema": { "$ref": "#/entities/Contact" },
+      "description": "Contacts for the user"
+    },
+    "/users/{userId}/arenas/{arenaId}": {
+      "schema": { "$ref": "#/entities/Arena" },
+      "description": "Arenas for the user"
+    },
+    "/test/{docId}": {
+      "schema": { "type": "object", "properties": { "status": { "type": "string" } } },
+      "description": "Connection test path"
     }
   }
 }
